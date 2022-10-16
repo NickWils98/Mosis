@@ -101,6 +101,115 @@ class Scanner:
                 self.stream.rollback()
             return success
 
+
+class Req5Scanner(Scanner):
+    def __int__(self, stream):
+        # superclass constructor
+        super().__init__(stream)
+
+        self.gate_number = 0
+        self.ship_number = 0
+        self.accepting_states = ["13"]
+
+    def __str__(self):
+        return str(self.gate_number) + "E" + str(self.ship_number)
+
+    def transition(self, state, input):
+        """
+        Encodes transitions and actions
+        """
+        if state is None:
+            # action
+            # initialize variables
+            self.gate_number = 0
+            self.ship_number = 0
+            # new state
+            return "S1"
+
+        elif state == "S1":
+            if input  == 'S':
+                return "S2"
+            else:
+                return "S1"
+
+        elif state == "S2":
+            if input  == 'L':
+                return "S2"
+            else:
+                return "S1"
+
+        elif state == "S3":
+            if input == ' ':
+                return "S4"
+            else:
+                return "S1"
+
+        elif state == "S4":
+            if '0' <= input <= '9':
+                self.ship_number = ord(input.lower()) - ord('0')
+                return "S5"
+            else:
+                return "S1"
+
+        elif state == "S5":
+            if '0' <= input <= '9':
+                self.ship_number = self.ship_number * 10 + ord(input.lower()) - ord('0')
+                return "S5"
+            elif input == ' ':
+                return "S6"
+            else:
+                return "S1"
+
+        elif state == "S6":
+            if '0' <= input <= '9':
+                self.gate_number = ord(input.lower()) - ord('0')
+                return "S7"
+            else:
+                return "S1"
+
+        elif state == "S7":
+            if '0' <= input <= '9':
+                self.gate_number = self.ship_number * 10 + ord(input.lower()) - ord('0')
+                return "S7"
+            elif input == '\n':
+                return "S8"
+            else:
+                return "S1"
+
+        elif state == "S8":
+            if input == 'L':
+                return "S9"
+            else:
+                return "S8"
+
+        elif state == "S9":
+            if input == 'C':
+                return "S10"
+            else:
+                return "S8"
+
+        elif state == "S10":
+            if input == ' ':
+                return "S11"
+            else:
+                return "S8"
+
+        elif state == "S11":
+            if input == str(self.gate_number):
+                return "S12"
+            else:
+                return "S8"
+
+        elif state == "S12":
+            if input == '\n':
+                return "S13"
+
+        elif state == "S13":
+            return None
+    def entry(self, state, input):
+        pass
+
+
 ## An example scanner, see http://msdl.cs.mcgill.ca/people/hv/teaching/SoftwareDesign/COMP304B2003/assignments/assignment3/solution/
 class NumberScanner(Scanner):
     def __init__(self, stream):

@@ -6,8 +6,8 @@
 #
 
 # trace FSA dynamics (True | False)
-__trace__ = False
-# __trace__ = True
+# __trace__ = False
+__trace__ = True
 
 class CharacterStream:
     """
@@ -94,7 +94,7 @@ class Scanner:
                 print("")
 
             # now check whether to accept consumed characters
-            success = self.current_state in self.accepting_states
+            success = self.current_state not in self.accepting_states
             if success:
                 self.stream.commit()
             else:
@@ -103,16 +103,17 @@ class Scanner:
 
 
 class Req5Scanner(Scanner):
-    def __int__(self, stream):
+    def __init__(self, stream):
         # superclass constructor
         super().__init__(stream)
 
-        self.gate_number = 0
-        self.ship_number = 0
-        self.accepting_states = ["13"]
+        self.gate_list = 0
+        self.number = 0
+        self.accepting_states = ["S6"]
+        pass
 
     def __str__(self):
-        return str(self.gate_number) + "E" + str(self.ship_number)
+        return str(self.gate_number)
 
     def transition(self, state, input):
         """
@@ -121,91 +122,78 @@ class Req5Scanner(Scanner):
         if state is None:
             # action
             # initialize variables
-            self.gate_number = 0
-            self.ship_number = 0
+            self.gate_list = []
+            self.number = 0
             # new state
             return "S1"
 
         elif state == "S1":
-            if input  == 'S':
+            if input =="\n":
+                return "S1"
+            elif input == "L":
                 return "S2"
             else:
-                return "S1"
+                return "S10"
 
         elif state == "S2":
-            if input  == 'L':
-                return "S2"
+            if input  == 'O':
+                return "S3"
+            elif input == 'C':
+                return "S7"
             else:
-                return "S1"
+                return
 
         elif state == "S3":
             if input == ' ':
                 return "S4"
             else:
-                return "S1"
+                return
 
         elif state == "S4":
             if '0' <= input <= '9':
-                self.ship_number = ord(input.lower()) - ord('0')
+                self.number = (ord(input.lower()) - ord('0'))
+                self.gate_list.append(self.number)
                 return "S5"
             else:
-                return "S1"
+                return
 
         elif state == "S5":
-            if '0' <= input <= '9':
-                self.ship_number = self.ship_number * 10 + ord(input.lower()) - ord('0')
-                return "S5"
-            elif input == ' ':
+            if self.number+1 in self.gate_list:
                 return "S6"
-            else:
+            elif self.number-1 in self.gate_list:
+                return "S6"
+            elif input == "\n":
                 return "S1"
 
         elif state == "S6":
-            if '0' <= input <= '9':
-                self.gate_number = ord(input.lower()) - ord('0')
-                return "S7"
-            else:
-                return "S1"
+            return
 
         elif state == "S7":
-            if '0' <= input <= '9':
-                self.gate_number = self.ship_number * 10 + ord(input.lower()) - ord('0')
-                return "S7"
-            elif input == '\n':
+            if input == ' ':
                 return "S8"
             else:
-                return "S1"
+                return
 
         elif state == "S8":
-            if input == 'L':
+            if '0' <= input <= '9':
+                number = (ord(input.lower()) - ord('0'))
+                if number in self.gate_list:
+                    self.gate_list.remove(number)
                 return "S9"
             else:
-                return "S8"
+                return
 
         elif state == "S9":
-            if input == 'C':
-                return "S10"
-            else:
-                return "S8"
-
-        elif state == "S10":
-            if input == ' ':
-                return "S11"
-            else:
-                return "S8"
-
-        elif state == "S11":
-            if input == str(self.gate_number):
-                return "S12"
-            else:
-                return "S8"
-
-        elif state == "S12":
             if input == '\n':
-                return "S13"
+                return "S1"
+            else:
+                return
+        elif state == "S10":
+            if input == "\n":
+                return "S1"
+            else:
+                return "S10"
 
-        elif state == "S13":
-            return None
     def entry(self, state, input):
         pass
 
@@ -338,10 +326,16 @@ class NumberScanner(Scanner):
         pass
 
 if __name__ == "__main__":
-    stream = CharacterStream("123e-4")
-    scanner = NumberScanner(stream)
+
+    file = open('output_trace.txt', mode='r')
+    stream_string = file.read()
+    file.close()
+
+    stream = CharacterStream(stream_string)
+    scanner = Req5Scanner(stream)
     success = scanner.scan()
     if success:
-        print("Stream has been accepted. Number: %se%s" % (str(scanner.value), str(scanner.exp)))
+        print("Stream has been accepted.")
     else:
-        print("Stream not accepted")
+        print(f"Stream not accepted: Problem with gate: G{str(scanner.number)}.\n"
+              f"Gates {str(scanner.gate_list)} are open.")

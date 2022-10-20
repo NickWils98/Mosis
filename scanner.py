@@ -8,6 +8,7 @@
 # trace FSA dynamics (True | False)
 # __trace__ = False
 __trace__ = True
+# print transitions (True | False)
 __toprint__ = False
 # __toprint__ = True
 
@@ -109,16 +110,19 @@ class Scanner:
 
 
 class Req5Scanner(Scanner):
+    """
+    Implementation of the Requirement 5 FSA
+    """
     def __init__(self, stream):
         # superclass constructor
         super().__init__(stream)
-
-        self.gate_list = 0
+        # List of open gates
+        self.gate_list = []
+        # ID of a ship
         self.number = 0
+        # The accepting states
         self.accepting_states = ["S6"]
 
-    def __str__(self):
-        return str(self.gate_number)
 
     def transition(self, state, input):
         """
@@ -205,18 +209,20 @@ class Req5Scanner(Scanner):
 
 
 class Req4Scanner(Scanner):
+    """
+    Implementation of the Requirement 4 FSA
+    """
     def __init__(self, stream):
         # superclass constructor
         super().__init__(stream)
-
+        # ID of a ship
         self.ship = -1
+        # Nuber of the current gate
         self.gate = -1
+        # Dictionary where you keep ship IDs that are between a gate for every gate
         self.gate_dict = {0:[], 1:[], 2:[]}
-        # define accepting states
+        # The accepting states
         self.accepting_states=["S13"]
-
-    # def __str__(self):
-    #     return str(self.ship)
 
     def transition(self, state, input):
         """
@@ -231,7 +237,7 @@ class Req4Scanner(Scanner):
             return "S1"
 
         elif state == "S1":
-            if input =="\n":
+            if input == "\n":
                 return "S1"
             elif input == "S":
                 return "S2"
@@ -412,31 +418,42 @@ class Req4Scanner(Scanner):
         else:
             return None
 
-
     def entry(self, state, input):
         pass
 
 
 if __name__ == "__main__":
+    # Make a list of file names
     file_list = ["output_trace.txt"]
     for i in range(1,7):
         file_list.append(f"trace{i}.txt")
+    # Go over all the files
     for file_name in file_list:
         print(f"{file_name}" )
         file = open(file_name, mode='r')
         stream_string = file.read()
         file.close()
+        # Make a stream of characters of the file
         stream = CharacterStream(stream_string)
-        scanner = Req4Scanner(stream)
-        success = scanner.scan()
-        if success:
+
+        # Make sure requirement 4 holds
+        scannerS4 = Req4Scanner(stream)
+        successS4 = scannerS4.scan()
+        print(f"Requirement 4:")
+        if successS4:
             print("Stream has been accepted.")
         else:
-            print(f"Stream not accepted: A ship is crushed at gate: G{str(scanner.gate)}.\n"
-                  f"The following ships are crushed {str(scanner.gate_dict[scanner.gate])}.")
-        # if success:
-        #     print("Stream has been accepted.")
-        # else:
-        #     print(f"Stream not accepted: Problem with gate: G{str(scanner.number)}.\n"
-        #           f"Gates {str(scanner.gate_list)} are open.")
+            print(f"Stream not accepted: A ship is crushed at gate: G{str(scannerS4.gate)}.\n"
+                  f"The following ships are crushed {str(scannerS4.gate_dict[scannerS4.gate])}.")
+
+        # Make sure requirement 5 holds
+        scannerS5 = Req5Scanner(stream)
+        successS5 = scannerS5.scan()
+        print(f"Requirement 5:")
+        if successS5:
+            print("Stream has been accepted.")
+        else:
+            print(f"Stream not accepted: Problem with gate: G{str(scannerS5.number)}.\n"
+                  f"Gates {str(scannerS5.gate_list)} are open.")
+
         print("")

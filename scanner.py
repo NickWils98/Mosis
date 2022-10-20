@@ -16,6 +16,7 @@ class CharacterStream:
     """
     A stream of characters helper class.
     """
+
     def __init__(self, string):
         self.string = string
         self.last_ptr = -1
@@ -28,8 +29,8 @@ class CharacterStream:
         return self.string
 
     def peek(self):
-        if self.cur_ptr+1 < len(self.string):
-            return self.string[self.cur_ptr+1]
+        if self.cur_ptr + 1 < len(self.string):
+            return self.string[self.cur_ptr + 1]
         return None
 
     def consume(self):
@@ -47,10 +48,11 @@ class Scanner:
     A simple Finite State Automaton simulator.
     Used for scanning an input stream.
     """
+
     def __init__(self, stream):
         self.set_stream(stream)
-        self.current_state=None
-        self.accepting_states=[]
+        self.current_state = None
+        self.accepting_states = []
 
     def set_stream(self, stream):
         self.stream = stream
@@ -84,7 +86,6 @@ class Scanner:
                         else:
                             print("|->", next_state)
 
-
                 # stop if a transition was not possible
                 if next_state is None:
                     break
@@ -113,6 +114,7 @@ class Req5Scanner(Scanner):
     """
     Implementation of the Requirement 5 FSA
     """
+
     def __init__(self, stream):
         # superclass constructor
         super().__init__(stream)
@@ -122,7 +124,6 @@ class Req5Scanner(Scanner):
         self.number = 0
         # The accepting states
         self.accepting_states = ["S6"]
-
 
     def transition(self, state, input):
         """
@@ -136,7 +137,7 @@ class Req5Scanner(Scanner):
             return "S1"
 
         elif state == "S1":
-            if input =="\n":
+            if input == "\n":
                 return "S1"
             elif input == "L":
                 return "S2"
@@ -144,7 +145,7 @@ class Req5Scanner(Scanner):
                 return "S10"
 
         elif state == "S2":
-            if input  == 'O':
+            if input == 'O':
                 return "S3"
             elif input == 'C':
                 return "S7"
@@ -166,9 +167,9 @@ class Req5Scanner(Scanner):
                 return
 
         elif state == "S5":
-            if self.number+1 in self.gate_list:
+            if self.number + 1 in self.gate_list:
                 return "S6"
-            elif self.number-1 in self.gate_list:
+            elif self.number - 1 in self.gate_list:
                 return "S6"
             elif input == "\n":
                 return "S1"
@@ -212,6 +213,7 @@ class Req4Scanner(Scanner):
     """
     Implementation of the Requirement 4 FSA
     """
+
     def __init__(self, stream):
         # superclass constructor
         super().__init__(stream)
@@ -220,9 +222,9 @@ class Req4Scanner(Scanner):
         # Nuber of the current gate
         self.gate = -1
         # Dictionary where you keep ship IDs that are between a gate for every gate
-        self.gate_dict = {0:[], 1:[], 2:[]}
+        self.gate_dict = {0: [], 1: [], 2: []}
         # The accepting states
-        self.accepting_states=["S13"]
+        self.accepting_states = ["S13"]
 
     def transition(self, state, input):
         """
@@ -232,7 +234,7 @@ class Req4Scanner(Scanner):
             # initialize variables
             self.ship = -1
             self.gate = -1
-            self.gate_dict = {0:[], 1:[], 2:[]}
+            self.gate_dict = {0: [], 1: [], 2: []}
             # new state
             return "S1"
 
@@ -245,7 +247,7 @@ class Req4Scanner(Scanner):
                 return "S23"
 
         elif state == "S2":
-            if input  == 'L':
+            if input == 'L':
                 return "S3"
             elif input in ["A", "C", "P"]:
                 return "S1"
@@ -411,7 +413,7 @@ class Req4Scanner(Scanner):
                 return "S23"
 
         elif state == "S24":
-            if input =="\n":
+            if input == "\n":
                 return "S8"
             else:
                 return "S24"
@@ -425,11 +427,11 @@ class Req4Scanner(Scanner):
 if __name__ == "__main__":
     # Make a list of file names
     file_list = ["output_trace.txt"]
-    for i in range(1,7):
+    for i in range(1, 7):
         file_list.append(f"trace{i}.txt")
     # Go over all the files
     for file_name in file_list:
-        print(f"{file_name}" )
+        print(f"{file_name}")
         file = open(file_name, mode='r')
         stream_string = file.read()
         file.close()

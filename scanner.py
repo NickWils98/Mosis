@@ -6,11 +6,10 @@
 #
 
 # trace FSA dynamics (True | False)
-# __trace__ = False
-__trace__ = True
+__trace__ = False
+# __trace__ = True
 # print transitions (True | False)
-__toprint__ = False
-# __toprint__ = True
+
 
 class CharacterStream:
     """
@@ -61,53 +60,49 @@ class Scanner:
         self.current_state = self.transition(self.current_state, None)
 
         if __trace__:
-            if __toprint__:
-                print("\ndefault transition --> " + self.current_state)
+            print("\ndefault transition --> " + self.current_state)
 
-            while True:
-                # look ahead at the next character in the input stream
-                next_char = self.stream.peek()
+        while True:
+            # look ahead at the next character in the input stream
+            next_char = self.stream.peek()
 
-                # stop if this is the end of the input stream
-                if next_char is None: break
-
-                if __trace__:
-                    if self.current_state is not None:
-                        if __toprint__:
-                            print("transition", self.current_state, "-|", next_char, end=' ')
-
-                # perform transition and its action to the appropriate new state
-                next_state = self.transition(self.current_state, next_char)
-
-                if __trace__:
-                    if __toprint__:
-                        if next_state is None:
-                            print("")
-                        else:
-                            print("|->", next_state)
-
-                # stop if a transition was not possible
-                if next_state is None:
-                    break
-                else:
-                    self.current_state = next_state
-                    # perform the new state's entry action (if any)
-                    self.entry(self.current_state, next_char)
-
-                # now, actually consume the next character in the input stream
-                next_char = self.stream.consume()
+            # stop if this is the end of the input stream
+            if next_char is None: break
 
             if __trace__:
-                if __toprint__:
-                    print("")
+                if self.current_state is not None:
+                    print("transition", self.current_state, "-|", next_char, end=' ')
 
-            # now check whether to accept consumed characters
-            success = self.current_state not in self.accepting_states
-            if success:
-                self.stream.commit()
+            # perform transition and its action to the appropriate new state
+            next_state = self.transition(self.current_state, next_char)
+
+            if __trace__:
+                if next_state is None:
+                    print("")
+                else:
+                    print("|->", next_state)
+
+            # stop if a transition was not possible
+            if next_state is None:
+                break
             else:
-                self.stream.rollback()
-            return success
+                self.current_state = next_state
+                # perform the new state's entry action (if any)
+                self.entry(self.current_state, next_char)
+
+            # now, actually consume the next character in the input stream
+            next_char = self.stream.consume()
+
+        if __trace__:
+            print("")
+
+        # now check whether to accept consumed characters
+        success = self.current_state not in self.accepting_states
+        if success:
+            self.stream.commit()
+        else:
+            self.stream.rollback()
+        return success
 
 
 class Req5Scanner(Scanner):

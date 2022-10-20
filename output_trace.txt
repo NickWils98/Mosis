@@ -16,7 +16,6 @@ PR PBO 1
 SP 0 G0
 LO 0
 SP 0 G0
-LO 1
 SL 0 0
 SP 1 G0
 SL 1 0

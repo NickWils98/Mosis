@@ -8,6 +8,8 @@
 # trace FSA dynamics (True | False)
 # __trace__ = False
 __trace__ = True
+__toprint__ = False
+# __toprint__ = True
 
 class CharacterStream:
     """
@@ -56,7 +58,8 @@ class Scanner:
         self.current_state = self.transition(self.current_state, None)
 
         if __trace__:
-            print("\ndefault transition --> " + self.current_state)
+            if __toprint__:
+                print("\ndefault transition --> " + self.current_state)
 
             while True:
                 # look ahead at the next character in the input stream
@@ -67,16 +70,18 @@ class Scanner:
 
                 if __trace__:
                     if self.current_state is not None:
-                        print("transition", self.current_state, "-|", next_char, end=' ')
+                        if __toprint__:
+                            print("transition", self.current_state, "-|", next_char, end=' ')
 
                 # perform transition and its action to the appropriate new state
                 next_state = self.transition(self.current_state, next_char)
 
                 if __trace__:
-                    if next_state is None:
-                        print("")
-                    else:
-                        print("|->", next_state)
+                    if __toprint__:
+                        if next_state is None:
+                            print("")
+                        else:
+                            print("|->", next_state)
 
 
                 # stop if a transition was not possible
@@ -91,7 +96,8 @@ class Scanner:
                 next_char = self.stream.consume()
 
             if __trace__:
-                print("")
+                if __toprint__:
+                    print("")
 
             # now check whether to accept consumed characters
             success = self.current_state not in self.accepting_states
@@ -110,7 +116,6 @@ class Req5Scanner(Scanner):
         self.gate_list = 0
         self.number = 0
         self.accepting_states = ["S6"]
-        pass
 
     def __str__(self):
         return str(self.gate_number)
@@ -120,7 +125,6 @@ class Req5Scanner(Scanner):
         Encodes transitions and actions
         """
         if state is None:
-            # action
             # initialize variables
             self.gate_list = []
             self.number = 0
@@ -193,149 +197,246 @@ class Req5Scanner(Scanner):
                 return "S1"
             else:
                 return "S10"
-
-    def entry(self, state, input):
-        pass
-
-
-## An example scanner, see http://msdl.cs.mcgill.ca/people/hv/teaching/SoftwareDesign/COMP304B2003/assignments/assignment3/solution/
-class NumberScanner(Scanner):
-    def __init__(self, stream):
-        # superclass constructor
-        super().__init__(stream)
-
-        self.value = 0
-        self.exp = 0
-        self.scale = 1
-
-        # define accepting states
-        self.accepting_states=["S2","S4","S7"]
-
-    def __str__(self):
-        return str(self.value) + "E" + str(self.exp)
-
-    def transition(self, state, input):
-        """
-        Encodes transitions and actions
-        """
-        if state is None:
-            # action
-            # initialize variables
-            self.value = 0
-            self.exp = 0
-            # new state
-            return "S1"
-
-        elif state == "S1":
-            if input  == '.':
-                # action
-                self.scale = 0.1
-                # new state
-                return "S3"
-            elif '0' <= input <= '9':
-                # action
-                self.value = ord(input.lower()) - ord('0')
-                # new state
-                return "S2"
-            else:
-                return None
-
-        elif state == "S2":
-            if input  == '.':
-                # action
-                self.scale = 0.1
-                # new state
-                return "S4"
-            elif '0' <= input <= '9':
-                # action
-                self.value = self.value * 10 + ord(input.lower()) - ord('0')
-                # new state
-                return "S2"
-            elif input.lower()  == 'e':
-                # action
-                self.exp = 1
-                # new state
-                return "S5"
-            else:
-                return None
-
-        elif state == "S3":
-            if '0' <= input <= '9':
-                # action
-                self.value += self.scale * (ord(input.lower()) - ord('0'))
-                self.scale /= 10
-                # new state
-                return "S4"
-            else:
-                return None
-
-        elif state == "S4":
-            if '0' <= input <= '9':
-                # action
-                self.value += self.scale * (ord(input.lower()) - ord('0'))
-                self.scale /= 10
-                # new state
-                return "S4"
-            elif input.lower()  == 'e':
-                # action
-                self.exp = 1
-                # new state
-                return "S5"
-            else:
-                return None
-
-        elif state == "S5":
-            if input == '+':
-                # new state
-                return "S6"
-            elif input  == '-':
-                # action
-                self.exp = -1
-                # new state
-                return "S6"
-            elif '0' <= input <= '9':
-                # action
-                self.exp *= ord(input.lower()) - ord('0')
-                # new state
-                return "S7"
-            else:
-                return None
-
-        elif state == "S6":
-            if '0' <= input <= '9':
-                # action
-                self.exp *= ord(input.lower()) - ord('0')
-                # new state
-                return "S7"
-            else:
-                return None
-
-        elif state == "S7":
-            if '0' <= input <= '9':
-                # action
-                self.exp = self.exp * 10 + ord(input.lower()) - ord('0')
-                # new state
-                return "S7"
-            else:
-                return None
-
         else:
             return None
 
     def entry(self, state, input):
         pass
 
+
+class Req4Scanner(Scanner):
+    def __init__(self, stream):
+        # superclass constructor
+        super().__init__(stream)
+
+        self.ship = -1
+        self.gate = -1
+        self.gate_dict = {0:[], 1:[], 2:[]}
+        # define accepting states
+        self.accepting_states=["S13"]
+
+    # def __str__(self):
+    #     return str(self.ship)
+
+    def transition(self, state, input):
+        """
+        Encodes transitions and actions
+        """
+        if state is None:
+            # initialize variables
+            self.ship = -1
+            self.gate = -1
+            self.gate_dict = {0:[], 1:[], 2:[]}
+            # new state
+            return "S1"
+
+        elif state == "S1":
+            if input =="\n":
+                return "S1"
+            elif input == "S":
+                return "S2"
+            else:
+                return "S23"
+
+        elif state == "S2":
+            if input  == 'L':
+                return "S3"
+            elif input in ["A", "C", "P"]:
+                return "S1"
+            else:
+                return
+
+        elif state == "S3":
+            if input == ' ':
+                return "S4"
+            else:
+                return
+
+        elif state == "S4":
+            if '0' <= input <= '9':
+                self.ship = (ord(input.lower()) - ord('0'))
+                return "S5"
+            else:
+                return
+
+        elif state == "S5":
+            if '0' <= input <= '9':
+                self.ship = self.ship * 10 + ord(input.lower()) - ord('0')
+                return "S5"
+            elif input == " ":
+                return "S6"
+            else:
+                return
+
+        elif state == "S6":
+            if '0' <= input <= '9':
+                gate = (ord(input.lower()) - ord('0'))
+                self.gate_dict[gate].append(self.ship)
+                return "S7"
+            else:
+                return
+
+        elif state == "S7":
+            if input == '\n':
+                return "S8"
+            else:
+                return
+
+        elif state == "S8":
+            if input == "\n":
+                return "S8"
+            elif input == "P":
+                return "S24"
+            elif input == "L":
+                return "S9"
+            elif input == "S":
+                return "S14"
+            else:
+                return
+
+        elif state == "S9":
+            if input == 'C':
+                return "S10"
+            elif input == "O":
+                return "S24"
+            else:
+                return
+
+        elif state == "S10":
+            if input == " ":
+                return "S11"
+            else:
+                return
+        elif state == "S11":
+            if '0' <= input <= '9':
+                self.gate = (ord(input.lower()) - ord('0'))
+                return "S12"
+            else:
+                return
+
+        elif state == "S12":
+            if len(self.gate_dict[self.gate]) != 0:
+                return "S13"
+            elif input == "\n":
+                return "S8"
+            else:
+                return
+
+        elif state == "S13":
+            return
+
+        elif state == "S14":
+            if input == 'P':
+                return "S15"
+            elif input == "L":
+                return "S3"
+            elif input in ["A", "C"]:
+                return "S24"
+            else:
+                return
+
+        elif state == "S15":
+            if input == ' ':
+                return "S16"
+            else:
+                return
+
+        elif state == "S16":
+            if '0' <= input <= '9':
+                self.ship = (ord(input.lower()) - ord('0'))
+                return "S17"
+            else:
+                return
+
+        elif state == "S17":
+            if '0' <= input <= '9':
+                self.ship = self.ship * 10 + ord(input.lower()) - ord('0')
+                return "S17"
+            elif input == " ":
+                return "S18"
+            else:
+                return
+
+        elif state == "S18":
+            if input in ["A", "B", "G"]:
+                return "S24"
+            elif input == "L":
+                return "S20"
+            elif input == "P":
+                return "S19"
+            else:
+                return
+
+        elif state == "S19":
+            if input == "O":
+                return "S24"
+            elif input == "I":
+                # if self.ship in self.gate_dict[gate]:
+                self.gate_dict[2].remove(self.ship)
+                return "S22"
+            else:
+                return
+
+        elif state == "S20":
+            if '0' <= input <= '9':
+                gate = (ord(input.lower()) - ord('0'))
+                # if self.ship in self.gate_dict[gate]:
+                self.gate_dict[gate].remove(self.ship)
+                return "S21"
+            else:
+                return
+
+        elif state == "S21":
+            if input == "\n":
+                return "S8"
+            else:
+                return
+
+        elif state == "S22":
+            if input == "\n":
+                return "S8"
+            else:
+                return
+
+        elif state == "S23":
+            if input == "\n":
+                return "S1"
+            else:
+                return "S23"
+
+        elif state == "S24":
+            if input =="\n":
+                return "S8"
+            else:
+                return "S24"
+        else:
+            return None
+
+
+    def entry(self, state, input):
+        pass
+
+
 if __name__ == "__main__":
-
-    file = open('output_trace.txt', mode='r')
-    stream_string = file.read()
-    file.close()
-
-    stream = CharacterStream(stream_string)
-    scanner = Req5Scanner(stream)
-    success = scanner.scan()
-    if success:
-        print("Stream has been accepted.")
-    else:
-        print(f"Stream not accepted: Problem with gate: G{str(scanner.number)}.\n"
-              f"Gates {str(scanner.gate_list)} are open.")
+    file_list = ["output_trace.txt"]
+    for i in range(1,7):
+        file_list.append(f"trace{i}.txt")
+    for file_name in file_list:
+        print(f"{file_name}" )
+        file = open(file_name, mode='r')
+        stream_string = file.read()
+        file.close()
+        stream = CharacterStream(stream_string)
+        scanner = Req4Scanner(stream)
+        success = scanner.scan()
+        if success:
+            print("Stream has been accepted.")
+        else:
+            print(f"Stream not accepted: A ship is crushed at gate: G{str(scanner.gate)}.\n"
+                  f"The following ships are crushed {str(scanner.gate_dict[scanner.gate])}.")
+        # if success:
+        #     print("Stream has been accepted.")
+        # else:
+        #     print(f"Stream not accepted: Problem with gate: G{str(scanner.number)}.\n"
+        #           f"Gates {str(scanner.gate_list)} are open.")
+        print("")
